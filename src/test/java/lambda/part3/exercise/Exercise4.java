@@ -1,37 +1,52 @@
 package lambda.part3.exercise;
 
-import lambda.data.Employee;
-import lambda.data.JobHistoryEntry;
-import lambda.data.Person;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-
-import static org.junit.Assert.assertEquals;
+import java.util.stream.Collectors;
+import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
+import lambda.data.Person;
+import org.junit.Test;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public class Exercise4 {
 
     private static class LazyCollectionHelper<T, R> {
 
+        private final List<T> source;
+        private final Function<List<T>, List<R>> function;
+
+        private LazyCollectionHelper(List<T> source, Function<List<T>, List<R>> function) {
+            this.source = source;
+            this.function = function;
+        }
+
         public static <T> LazyCollectionHelper<T, T> from(List<T> list) {
-            throw new UnsupportedOperationException();
+            return new LazyCollectionHelper<>(list, t -> t);
         }
 
         public <U> LazyCollectionHelper<T, U> flatMap(Function<R, List<U>> flatMapping) {
-            throw new UnsupportedOperationException();
+            Function<List<R>, List<U>> function = list -> {
+                List<U> result = new ArrayList<>();
+                for (R r : list) {
+                    result.addAll(flatMapping.apply(r));
+                }
+                return result;
+            };
+            return new LazyCollectionHelper<>(source, this.function.andThen(function));
         }
 
         public <U> LazyCollectionHelper<T, U> map(Function<R, U> mapping) {
-            throw new UnsupportedOperationException();
+            return flatMap(r -> Collections.singletonList(mapping.apply(r)));
         }
 
         public List<R> force() {
-            throw new UnsupportedOperationException();
+            return function.apply(source);
         }
     }
 
@@ -39,13 +54,20 @@ public class Exercise4 {
     public void mapEmployeesToCodesOfLetterTheirPositionsUsingLazyFlatMapHelper() {
         List<Employee> employees = getEmployees();
 
-        List<Integer> codes = null;
-        // TODO              LazyCollectionHelper.from(employees)
-        // TODO                                  .flatMap(Employee -> JobHistoryEntry)
-        // TODO                                  .map(JobHistoryEntry -> String(position))
-        // TODO                                  .flatMap(String -> Character(letter))
-        // TODO                                  .map(Character -> Integer(code letter)
-        // TODO                                  .force();
+        List<Integer> codes = LazyCollectionHelper.from(employees)
+                                                  .flatMap(Employee::getJobHistory)
+                                                  .map(JobHistoryEntry::getPosition)
+                                                  .flatMap(s -> s.chars()
+                                                                 .mapToObj(value -> (char) value)
+                                                                 .collect(Collectors.toList()))
+                                                  .map(Integer::valueOf)
+                                                  .force();
+        //               LazyCollectionHelper.from(employees)
+        //                                   .flatMap(Employee -> JobHistoryEntry)
+        //                                   .map(JobHistoryEntry -> String(position))
+        //                                   .flatMap(String -> Character(letter))
+        //                                   .map(Character -> Integer(code letter)
+        //                                   .force();
         assertEquals(calcCodes("dev", "dev", "tester", "dev", "dev", "QA", "QA", "dev", "tester", "tester", "QA", "QA", "QA", "dev"), codes);
     }
 
