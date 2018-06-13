@@ -1,10 +1,11 @@
 package api.exercise;
 
-import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.function.BinaryOperator;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class Exercise2 {
 
@@ -47,7 +48,15 @@ public class Exercise2 {
      * @see <a href="https://habr.com/company/epam_systems/blog/247805">Сканирование</a>
      */
     private static <T> T[] sequentialPrefix(T[] source, BinaryOperator<T> operator) {
-        throw new UnsupportedOperationException();
+        T[] result = source.clone();
+        int n = source.length;
+        for (int step = 0; step < log2(n) + 1; step++) {
+            int dist = pow(2, step);
+            for (int i = n - 1; i > dist - 1; i--) {
+                result[i] = operator.apply(result[i], result[i - dist]);
+            }
+        }
+        return result;
     }
 
     @Test
@@ -76,7 +85,10 @@ public class Exercise2 {
      * @throws IllegalArgumentException Если {@code value <= 0}
      */
     private static int log2(int value) throws IllegalArgumentException {
-        throw new UnsupportedOperationException();
+        if (value <= 0) {
+            throw new IllegalArgumentException();
+        }
+        return (int) (Math.log(value) / Math.log(2));
     }
 
     @Test
@@ -107,6 +119,13 @@ public class Exercise2 {
      * @throws IllegalArgumentException Если {@code base < 0} или {@code degree < 0}
      */
     private static int pow(int base, int degree) throws IllegalArgumentException {
-        throw new UnsupportedOperationException();
+        if (base < 0 || degree < 0) {
+            throw new IllegalArgumentException();
+        }
+        int result = 1;
+        for (int i = 0; i < degree; i++) {
+            result *= base;
+        }
+        return result;
     }
 }
