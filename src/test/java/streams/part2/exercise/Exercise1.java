@@ -90,8 +90,8 @@ public class Exercise1 {
         Function<Employee, Set<Person>> employeeToSetPersonFunction = e ->
             new HashSet<>(Collections.singletonList(e.getPerson()));
 
-        BinaryOperator<Set<Person>> mergeSets = (left, rigth) -> {
-            left.addAll(rigth);
+        BinaryOperator<Set<Person>> mergeSets = (left, right) -> {
+            left.addAll(right);
             return left;
         };
 
@@ -118,8 +118,6 @@ public class Exercise1 {
         List<Employee> employees = getEmployees();
 
         // реализация
-
-
         Map<String, Set<Person>> result =
             employees.stream()
                      .collect(Collectors.groupingBy(employeeGetFirstPositionFunction,
