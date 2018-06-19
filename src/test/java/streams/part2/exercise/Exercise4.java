@@ -25,7 +25,7 @@ public class Exercise4 {
     private List<String> getFrequentlyOccurringWords(String text, int numberWords) {
         return Pattern.compile("\\s+")
                       .splitAsStream(text)
-                      .filter(Pattern.compile("[\\wа-яёА-ЯЁ]+").asPredicate())
+                      .filter(Pattern.compile("[a-zA-Zа-яёА-ЯЁ]+").asPredicate())
                       .map(String::toLowerCase)
                       .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                       .entrySet()
