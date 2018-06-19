@@ -1,11 +1,16 @@
 package streams.part2.exercise;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.junit.Test;
 
 public class Exercise4 {
 
@@ -18,7 +23,19 @@ public class Exercise4 {
      * @return Список отобранных слов (в нижнем регистре).
      */
     private List<String> getFrequentlyOccurringWords(String text, int numberWords) {
-        throw new UnsupportedOperationException();
+        return Pattern.compile("\\s+")
+                      .splitAsStream(text)
+                      .filter(Pattern.compile("[\\wа-яёА-ЯЁ]+").asPredicate())
+                      .map(String::toLowerCase)
+                      .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                      .entrySet()
+                      .stream()
+                      .sorted(Comparator.<Map.Entry<String, Long>>comparingLong(Map.Entry::getValue)
+                                        .reversed()
+                                        .thenComparing(Map.Entry::getKey))
+                      .limit(numberWords)
+                      .map(Entry::getKey)
+                      .collect(Collectors.toList());
     }
 
     @Test
